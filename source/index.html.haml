@@ -1,0 +1,138 @@
+!!!
+%html
+  %head
+    %title Задачи
+    %meta(charset="utf-8")
+    -# %meta(name="apple-mobile-web-app-capable" content="yes")
+    -# %meta(name="viewport" content=" initial-scale = 1, user-scalable = no")
+    -# %link(href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet")
+    = stylesheet_link_tag 'all'
+
+  %body
+
+
+
+  %script(type="text/x-handlebars" data-template-name="application")
+    =hb 'outlet'
+
+
+  %script(type="text/x-handlebars" data-template-name="index")
+    .form-inline
+      %label Введите ваш API key для Redmine
+      =hb 'view Em.TextField placeholder="api_key" valueBinding="key" class="input-xlarge" '
+      %button.btn(_action="save") Сохранить
+     
+      
+      %label
+        Можно получить API key в
+        :plain
+          <a href="{{ unbound App.REDMINE_URL }}my/account">вашем профиле</a>
+        RedMine
+    
+
+  
+  %script(type="text/x-handlebars" data-template-name="projects")
+    .navbar.navbar-fixed-top.navbar-inverse
+      .navbar-inner
+        .container
+          .brand
+            Задачи
+          =hb 'if App.ajax.now' do
+            .loader
+              %img(src="images/loader.gif")
+          
+          .pull-right
+            =hb 'view App.ButtonGroup contentBinding="App.mode.list" valueBinding="App.mode.selected" ' do
+              =hb 'each item in view.content' do
+                :plain 
+                  <button class="btn btn-inverse" value="{{ unbound item.id }}">
+                    {{ unbound item.title }}
+                  </button>
+
+
+            %button.btn.btn-inverse
+              %i.icon-refresh.icon-white
+
+
+
+    .row
+      .span9.project
+        %h3 
+          Потом 
+          %span.badge
+            =hb 'controllers.laterIssues.filteredContent.length'
+          %span.tip новые неназначенные или обратная связь или отложенная
+        =hb 'render laterIssues'
+      
+        %h3 
+          Готово
+          %span.badge
+            =hb 'controllers.doneIssues.filteredContent.length'
+          %span.tip назначены, закрытые или решена или к тестированию или отклонена, последние 5
+        =hb 'render doneIssues'
+
+        %h3 
+          Сейчас
+          %span.badge
+            =hb 'controllers.nowIssues.filteredContent.length'
+          %span.tip назначены, в работе
+        =hb 'render nowIssues'
+
+        %h3 
+          Далее
+          %span.badge
+            =hb 'controllers.nextIssues.filteredContent.length'
+          %span.tip назначены, новые
+        =hb 'render nextIssues'
+
+
+        -# =hb 'outlet'
+
+      .span3
+        =hb 'render memberships'
+
+        %ul.nav.nav-list.well.verions
+          %li.nav-header Версии
+          %li
+            %a Все
+          %li
+            %a v0.5.1
+
+        %ul.nav.nav-list.well.projects
+          %li.nav-header Проекты
+          =hb 'each p in controller' do
+            =hb 'linkTo "project" p tagName="li" href=false ' do
+              =hb 'linkTo "project" p  ' do
+                =hb 'p.name'
+
+    
+
+
+
+  %script(type="text/x-handlebars" data-template-name="memberships")
+    .members.well
+      =hb 'each m in controller.filteredContent itemViewClass="App.UserView"' do
+        :plain
+          <div class="man" title="{{ unbound m.user._name }}">
+            <div class="name">{{ m.user._name }}</div>
+            <img src="{{unbound m.user.gravatar}}" />
+          </div>
+
+
+
+  %script(type="text/x-handlebars" data-template-name="issues_group")
+    =hb 'each i in controller.filteredContent  itemViewClass="App.IssueView" ' do
+      =hb 'if App.mode.isAll' do
+        =hb 'if i.assignedTo.id' do
+          %img{ bind: { src: "i.assignedTo.gravatar", title: "i.assignedTo._name" } }
+          =hb 'else'
+          %span.none
+
+      %span.id=hb 'unbound i.id'
+      =hb 'unbound i.subject'
+      :plain
+        <a class="full" target="_blank" href="{{ unbound i.link }}"> &rarr; </a>
+    
+    =hb 'view App.TextArea'
+
+  = javascript_include_tag "all"
