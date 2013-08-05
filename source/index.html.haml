@@ -124,16 +124,16 @@
 
 
   %script(type="text/x-handlebars" data-template-name="issues_group")
-    =hb 'each i in controller  itemViewClass="App.IssueView" ' do
-      =hb 'if App.mode.isAll' do
-        =hb 'if i.assignedTo.id' do
-          %img{ bind: { src: "i.assignedTo.gravatar", title: "i.assignedTo._name" } }
-          =hb 'else'
-          %span.none
+    =hb 'each i in controller  ' do
+      =hb 'view App.IssueView issueBinding=i' do
+        =hb 'if App.mode.isAll' do
+          =hb 'if i.assignedTo.id' do
+            %img{ bind: { src: "i.assignedTo.gravatar", title: "i.assignedTo._name" } }
+            =hb 'else'
+            %span.none
 
-      %a.full(target="_blank" href="{{ unbound i.link }}")=hb 'unbound i.id'
-      =hb 'i.priority.name'
-      =hb 'unbound i.subject'
+        %a.full(target="_blank" href="{{ unbound i.link }}")=hb 'unbound i.id'
+        =hb 'unbound i.subject'
     
 
   = javascript_include_tag "all"

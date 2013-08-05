@@ -116,7 +116,8 @@ App.ProjectRoute = Em.Route.extend
       openedIssues = App.Issue.find
         project_id: model.id
         status_id: 'opened'
-      
+        limit: 100
+
       doneIssues = App.Issue.find
         project_id: model.id
         # assigned_to_id: App.user.get('serverId')
@@ -353,6 +354,7 @@ Adapter.map 'App.Issue',
 App.IssuePriority = DS.Model.extend
   name: DS.attr 'string'
   isDefault: DS.attr 'boolean'
+  slug: (-> 'priority-' + @get 'id' ).property('id')
 
 # App.IssuePriority.reopenClass
 #   url: (url, query) ->
@@ -627,6 +629,9 @@ App.NextIssuesView = Em.View.extend App.IssuesGroup
 
 App.IssueView = Em.View.extend DragNDrop.Dragable, DragNDrop.Droppable,
   classNames: 'issue'.w()
+  classNameBindings: 'issue.priority.slug'
+  issue: null
+
   didDrop: (user) ->
     @get('controller').dropOnIssue @get('content'), user.get('content')
   
