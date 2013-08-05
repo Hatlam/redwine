@@ -91,12 +91,13 @@ App.ProjectsRoute = Em.Route.extend
     @_super controller, model
      
     App.User.find()
+    # App.Membership.find()
+    # App.IssuePriority.find()
   
     @controllerFor('laterIssues').set 'content', App.Issue.all()
     @controllerFor('nowIssues').set 'content', App.Issue.all()
     @controllerFor('nextIssues').set 'content', App.Issue.all()
-    @controllerFor('memberships').set 'content', App.Membership.all()
-
+    @controllerFor('users').set 'content', App.User.all()
 
 App.ProjectRoute = Em.Route.extend
   setupController: (controller, model) ->
@@ -105,11 +106,12 @@ App.ProjectRoute = Em.Route.extend
     @controllerFor('laterIssues').set 'project', model
     @controllerFor('nowIssues').set 'project', model
     @controllerFor('nextIssues').set 'project', model
-    @controllerFor('memberships').set 'project', model
+    @controllerFor('users').set 'project', model
 
     App.auth.ready.then =>
 
-      App.Membership.find(project_id: model.id)
+      @controllerFor('users').set 'memberships', App.Membership.find(project_id: model.id)
+
 
       openedIssues = App.Issue.find
         project_id: model.id
@@ -118,7 +120,7 @@ App.ProjectRoute = Em.Route.extend
       doneIssues = App.Issue.find
         project_id: model.id
         # assigned_to_id: App.user.get('serverId')
-        # limit: 15
+        limit: 5
         status_id: 'closed'
 
       @controllerFor('doneIssues').set 'content', doneIssues
@@ -280,11 +282,17 @@ DS.Model.reopenClass
 
 App.Project = DS.Model.extend
   name: DS.attr 'string'
- 
+  issueChangedOn: DS.attr 'date'
+  issueChangedOnSec: (->
+    @get('issueChangedOn')?.valueOf() || 0
+  ).property('issueChangedOn')
+
+
 App.Issue = DS.Model.extend
   subject: DS.attr 'string'
   description: DS.attr 'string'
   status: DS.belongsTo 'App.IssueStatus'
+  priority: DS.belongsTo 'App.IssuePriority'
   project: DS.belongsTo 'App.Project'
   author: DS.belongsTo 'App.User'
   assignedTo: DS.belongsTo 'App.User'
@@ -336,11 +344,23 @@ App.Issue = DS.Model.extend
 #
 
 
-# Adapter.map 'App.Issue',
-  # status: { embedded: 'load' }
+Adapter.map 'App.Issue',
+  priority: { embedded: 'load' }
   # project: { embedded: 'load' }
   # author: { embedded: 'load' }
   # assignedTo: { embedded: 'load' }
+
+App.IssuePriority = DS.Model.extend
+  name: DS.attr 'string'
+  isDefault: DS.attr 'boolean'
+
+# App.IssuePriority.reopenClass
+#   url: (url, query) ->
+#     console.log url, 'sds'
+#     # if query?.project_id isnt undefined
+#     #   url = url.replace('memberships', "/projects/#{ query.project_id }/memberships")
+#     #   delete query.project_id
+#     url
 
 App.IssueStatus = DS.Model.extend
   name: DS.attr 'string'
@@ -374,7 +394,15 @@ App.User = DS.Model.extend
   mail: DS.attr 'string'
   name: DS.attr 'string'
   serverId: DS.attr 'number'
-  
+ 
+  model: (->
+    i = @get 'serverId'
+    if i isnt null
+      App.User.all().find (u) -> u.id is i
+    else
+      @
+  ).property('serverId')
+
   _name: (->
     r = @get 'name'
     unless r
@@ -385,7 +413,7 @@ App.User = DS.Model.extend
   gravatar: (->
     if @get 'mail'
       dig = hex_md5 @get('mail').toLowerCase().trim()
-      "http://www.gravatar.com/avatar/#{ dig }.jpg?s=40&d=blank"
+      "http://www.gravatar.com/avatar/#{ dig }.jpg?rating=PG&s=80&d=blank"
   ).property('mail')
 
 
@@ -405,7 +433,19 @@ App.store.adapter.on 'error', (type) ->
  
 # controllers
 App.ProjectsController = Em.ArrayController.extend
-  needs: 'laterIssues doneIssues nextIssues nowIssues'.w()
+  needs: 'laterIssues doneIssues nextIssues nowIssues project'.w()
+  sortProperties: 'name'.w()
+  # sortAscending: false
+  
+  createIssue: (data) ->
+    transaction = App.store.transaction()
+    i = transaction.createRecord App.Issue, data
+    i.set 'project', @get 'controllers.project.content'
+    transaction.commit()
+
+
+App.ProjectController = Em.ObjectController.extend
+  a: 1
 
 
 App.IndexController = Em.Controller.extend
@@ -418,50 +458,43 @@ App.IndexController = Em.Controller.extend
 
 
 App.IssuesGroupController = Em.ArrayController.extend
-  filteredContent: Ember.computed.alias 'content'
-  sortProperties: 'updatedOnSec'.w()
-  projectId: null
+  sortProperties: 'priority.id'.w()
+  
   adopt: (i) ->
     console.log 'You need to implement this!', i
   
+  dropOnIssue: (i, o) ->
+    #assign
+    if App.User.detectInstance o
+      i.set 'assignedTo', o
+      App.store.commit()
+  
 
-  create: (i) ->
-    console.log 'You need to implement this!', i
-   
-  assign: (i, m) ->
-    i.set 'assignedTo', m.get('user')
-    App.store.commit()
+
 
 
 App.LaterIssuesController = App.IssuesGroupController.extend
-  filteredContent: (->
+  arrangedContent: (->
     p = @get 'project'
-    @get('content').filter (i) ->
+    c = @get('content').filter (i) ->
       if i.get('project') is p
         i.get('isWaiting') or i.get('isNewIssue') and not i.get('assignedTo')
+    c
 
-  ).property('content.@each.status.id','content.@each.assignedTo.id' , 'project')
+  ).property('content.@each.status.id','content.@each.assignedTo.id' , 'project', 'App.mode.selected')
 
-
-  create: (data) ->
-    transaction = App.store.transaction()
-    i = transaction.createRecord App.Issue, data
-    i.set 'project', @get 'project'
-    transaction.commit()
-
-
-  adopt: (i) ->
-    t = App.store.transaction()
-    t.add i
-    i.setProperties
-      assignedTo: App.user
-      status: App.IssueStatus.find(2)
-    t.commit()
+  # adopt: (i) ->
+  #   t = App.store.transaction()
+  #   t.add i
+  #   i.setProperties
+  #     assignedTo: App.user
+  #     status: App.IssueStatus.find(2)
+  #   t.commit()
 
 
 
 App.NowIssuesController = App.IssuesGroupController.extend
-  filteredContent: (->
+  arrangedContent: (->
     p = @get 'project'
     @get('content').filter (i) ->
       if i.get('project') is p
@@ -477,14 +510,14 @@ App.NowIssuesController = App.IssuesGroupController.extend
     t = App.store.transaction()
     t.add i
     i.setProperties
-      assignedTo: App.user
+      assignedTo: App.user.get('model')
       status: App.IssueStatus.find(2)
     t.commit()
 
 
 
 App.NextIssuesController = App.IssuesGroupController.extend
-  filteredContent: (->
+  arrangedContent: (->
     p = @get 'project'
     @get('content').filter (i) ->
       if i.get('project') is p
@@ -507,13 +540,31 @@ App.DoneIssuesController = App.IssuesGroupController.extend
     i.set 'status', App.IssueStatus.find(3)
     t.commit()
 
-App.MembershipsController = Em.ArrayController.extend
-  filteredContent: (->
+
+
+App.UsersController = Em.ArrayController.extend
+  arrangedContent: (->
+    a = Em.ArrayProxy.create content: []
+
+    @get('memberships')?.forEach (m) ->
+      a.pushObject m.get('user')
+
     p = @get 'project'
-    @get('content').filter (i) =>
+    
+    App.Issue.all().forEach (i) ->
       if i.get('project') is p
-        i
-  ).property('content.length','project')
+        u = i.get('assignedTo')
+        if u
+          a.pushObject u
+
+    # console.log 'p i', @get('project.issues')
+    # @get('content').uniq()
+      # cfilter (i) =>
+      # if i.get('project') is p
+      #   i
+      #
+    a.uniq()
+  ).property('content.length', 'project', 'memberships.length')
 
 # view
 #
@@ -577,28 +628,35 @@ App.NextIssuesView = Em.View.extend App.IssuesGroup
 App.IssueView = Em.View.extend DragNDrop.Dragable, DragNDrop.Droppable,
   classNames: 'issue'.w()
   didDrop: (user) ->
-    @get('controller').assign @get('content'), user.get('content')
+    @get('controller').dropOnIssue @get('content'), user.get('content')
+  
+  didInsertElement: ->
+    if  (new Date).valueOf() - @get('content.updatedOnSec') < 5000
+      @$().effect('highlight')
 
 
 App.UserView = Em.View.extend DragNDrop.Dragable,
   classNames: 'user'.w()
   a: 1
 
+
 App.TextArea = Ember.TextArea.extend
   keyUp: (e) ->
     if e.keyCode is 13 and not e.shiftKey
-      text = @get('value').replace(/\n$/, '')
-      @parse text
-        
-      # @get('controller').create @parse text
+      @get('controller').createIssue @parse @get 'value'
       @set 'value',''
 
   parse: (text) ->
-    console.log text, text.match(/(?:\r\n|[\r\n]))/)
+    text = text.replace(/\n$/, '')
+    text = text.split(/\n/)
+    if text[1]
+      unless text[1].match(/\S+/)
+        console.log 'second line', text[1]?.match(/\S+/)
+        text.splice(1,1)
 
     i =
-      subject: text
-      description: ''
+      subject: text.shift()
+      description: text.join('\n').replace(/^\n/,'')
    
 
 
