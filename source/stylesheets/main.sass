@@ -23,13 +23,19 @@ body
   // letter-spacing: 1px
   // font: 90% GalsC, "Trebuchet MS", sans-serif
   // font-size: 14px 
-  background: $dark-grey
+  // background: $dark-grey
+  background: #fff 
   color: white
-  padding-bottom: 200px  
+  padding-bottom: 100px  
 
 textarea
-  width: 98%
-  
+  display: block
+  width: 100%
+  box-sizing: border-box
+  height: 31px
+
+img
+  pointer-events: none
 
 h3
   margin: 20px 0 0
@@ -55,7 +61,7 @@ h3
   background: white
   color: $dark-grey
   padding: 65px 20px 40px 20px
-  box-shadow: 0px 4px 20px #111
+  // box-shadow: 0px 4px 20px #111
 
 .loader
   margin: 8px 0 0 -15px
@@ -78,14 +84,7 @@ ul.nav.well
   z-index: 1
 
 
-  .id
-    color: #ccc
-    min-width: 40px
-    text-align: right
-    display: inline-block
 
-    &:before
-      content: '#'
 
   img
     width: 20px
@@ -104,10 +103,17 @@ ul.nav.well
 
 
   a.full
-    position: absolute
-    right: 0
-    top: 0
-  
+    color: #ccc
+    min-width: 40px
+    text-align: right
+    display: inline-block
+
+    &:before
+      content: '#'
+
+    &:hover
+      color: #005580
+
   &:hover, &.drag-over
     background: #eee
   //   z-index: 2
@@ -120,7 +126,7 @@ ul.nav.well
 
 
 .issue-group
-  padding: 10px 0
+  padding: 0 0 10px 0
   border-radius: 5px
   border: 2px solid transparent
 
@@ -156,6 +162,34 @@ ul.nav.well
       height: 30px
 
     img
-      border-radius: 40px
+      // border-radius: 40px
       display: block
       margin-top: -40px 
+
+.fixed
+  position: fixed
+
+.right-panel.fixed
+  padding: 0 0 20px
+  .projects
+    max-height: 300px
+    overflow-y: scroll
+
+.inputArea
+  > div
+    box-sizing: border-box
+    position: fixed
+    bottom: 0
+    z-index: 10
+    background: $dark-grey
+    border-top-left-radius: 10px
+    border-top-right-radius: 10px
+
+    box-shadow: 2px 2px 10px #111
+  
+    padding: 10px 10px 0
+    
+    textarea
+
+
+ 
