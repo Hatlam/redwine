@@ -1,4 +1,5 @@
 //= require vendor/jquery
+//= require vendor/jquery-ui
 //= require vendor/jquery.cookie
 //= require vendor/handlebars
 //= require vendor/ember
