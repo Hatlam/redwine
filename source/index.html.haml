@@ -36,7 +36,8 @@
       .navbar-inner
         .container
           .brand
-            Задачи
+            =hb 'controllers.project.name'
+
           =hb 'if App.ajax.now' do
             .loader
               %img(src="images/loader.gif")
@@ -60,79 +61,79 @@
         %h3 
           Потом 
           %span.badge
-            =hb 'controllers.laterIssues.filteredContent.length'
+            =hb 'controllers.laterIssues.length'
           %span.tip новые неназначенные или обратная связь или отложенная
         =hb 'render laterIssues'
       
         %h3 
-          Готово
+          Далее
           %span.badge
-            =hb 'controllers.doneIssues.filteredContent.length'
-          %span.tip назначены, закрытые или решена или к тестированию или отклонена, последние 5
-        =hb 'render doneIssues'
+            =hb 'controllers.nextIssues.length'
+          %span.tip назначены, новые
+        =hb 'render nextIssues'
 
         %h3 
           Сейчас
           %span.badge
-            =hb 'controllers.nowIssues.filteredContent.length'
+            =hb 'controllers.nowIssues.length'
           %span.tip назначены, в работе
         =hb 'render nowIssues'
 
         %h3 
-          Далее
+          Готово
           %span.badge
-            =hb 'controllers.nextIssues.filteredContent.length'
-          %span.tip назначены, новые
-        =hb 'render nextIssues'
+            =hb 'controllers.doneIssues.length'
+          %span.tip назначены, закрытые или решена или к тестированию или отклонена, последние 5
+        =hb 'render doneIssues'
+
 
 
         -# =hb 'outlet'
 
       .span3
-        =hb 'render memberships'
+        .fixed.span3.right-panel
+          =hb 'render users'
 
-        %ul.nav.nav-list.well.verions
-          %li.nav-header Версии
-          %li
-            %a Все
-          %li
-            %a v0.5.1
+          -# %ul.nav.nav-list.well.verions
+            %li.nav-header Версии
+            %li
+              %a Все
+            %li
+              %a v0.5.1
 
-        %ul.nav.nav-list.well.projects
-          %li.nav-header Проекты
-          =hb 'each p in controller' do
-            =hb 'linkTo "project" p tagName="li" href=false ' do
-              =hb 'linkTo "project" p  ' do
-                =hb 'p.name'
-
-    
-
+          %ul.nav.nav-list.well.projects
+            %li.nav-header Проекты
+            =hb 'each p in controller' do
+              =hb 'linkTo "project" p tagName="li" href=false ' do
+                =hb 'linkTo "project" p  ' do
+                  =hb 'p.name'
 
 
-  %script(type="text/x-handlebars" data-template-name="memberships")
+    .row.inputArea
+      .span9
+        =hb 'view App.TextArea placeholder="создать новую неназначенную"  '
+
+
+  %script(type="text/x-handlebars" data-template-name="users")
     .members.well
-      =hb 'each m in controller.filteredContent itemViewClass="App.UserView"' do
-        :plain
-          <div class="man" title="{{ unbound m.user._name }}">
-            <div class="name">{{ m.user._name }}</div>
-            <img src="{{unbound m.user.gravatar}}" />
-          </div>
+      =hb 'each u in controller itemViewClass="App.UserView"' do
+        .man{ bind: { title: 'u._name' } } 
+          .name=hb 'u._name'
+          %img{bind: { src: 'u.gravatar' }}
 
 
 
   %script(type="text/x-handlebars" data-template-name="issues_group")
-    =hb 'each i in controller.filteredContent  itemViewClass="App.IssueView" ' do
+    =hb 'each i in controller  itemViewClass="App.IssueView" ' do
       =hb 'if App.mode.isAll' do
         =hb 'if i.assignedTo.id' do
           %img{ bind: { src: "i.assignedTo.gravatar", title: "i.assignedTo._name" } }
           =hb 'else'
           %span.none
 
-      %span.id=hb 'unbound i.id'
+      %a.full(target="_blank" href="{{ unbound i.link }}")=hb 'unbound i.id'
+      =hb 'i.priority.name'
       =hb 'unbound i.subject'
-      :plain
-        <a class="full" target="_blank" href="{{ unbound i.link }}"> &rarr; </a>
     
-    =hb 'view App.TextArea'
 
   = javascript_include_tag "all"
