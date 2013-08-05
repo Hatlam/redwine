@@ -6,6 +6,7 @@ DragNDrop.Dragable = Ember.Mixin.create
   draggable: 'true'
   dragStart: (event) ->
     dataTransfer = event.originalEvent.dataTransfer
+    dataTransfer.effectAllowed = 'copy'
     dataTransfer.setData('viewId', this.get('elementId'))
 
   wasDropped: ->
