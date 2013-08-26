@@ -8,11 +8,12 @@
     -# %link(href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet")
     = stylesheet_link_tag 'all'
 
+
   %body
 
-wwqw
 
   %script(type="text/x-handlebars" data-template-name="application")
+    %div{bind: {class: ':loader App.ajax.now:show' }} loading...
     =hb 'outlet'
 
 
@@ -38,9 +39,6 @@ wwqw
           .brand
             =hb 'controllers.project.name'
 
-          =hb 'if App.ajax.now' do
-            .loader
-              %img(src="images/loader.gif")
           
           .pull-right
             =hb 'view App.ButtonGroup contentBinding="App.mode.list" valueBinding="App.mode.selected" ' do
@@ -58,35 +56,13 @@ wwqw
 
     .row
       .span9.project
-        %h3 
-          Потом 
-          %span.badge
-            =hb 'controllers.laterIssues.length'
-          %span.tip новые неназначенные или обратная связь или отложенная
         =hb 'render laterIssues'
       
-        %h3 
-          Далее
-          %span.badge
-            =hb 'controllers.nextIssues.length'
-          %span.tip назначены, новые
         =hb 'render nextIssues'
 
-        %h3 
-          Сейчас
-          %span.badge
-            =hb 'controllers.nowIssues.length'
-          %span.tip назначены, в работе
         =hb 'render nowIssues'
 
-        %h3 
-          Готово
-          %span.badge
-            =hb 'controllers.doneIssues.length'
-          %span.tip назначены, закрытые или решена или к тестированию или отклонена, последние 5
         =hb 'render doneIssues'
-
-
 
         -# =hb 'outlet'
 
@@ -94,12 +70,15 @@ wwqw
         .fixed.span3.right-panel
           =hb 'render users'
 
-          -# %ul.nav.nav-list.well.verions
+          %ul.nav.nav-list.well.versions
             %li.nav-header Версии
-            %li
-              %a Все
-            %li
-              %a v0.5.1
+            =hb 'each v in controller.versions itemViewClass="App.VersionView"' do
+              =hb 'v.name'
+
+          %ul.nav.nav-list.well.priority
+            %li.nav-header Приоритеты
+            =hb 'each p in controller.priority itemViewClass="App.PriorityView"' do
+              &nbsp;
 
           %ul.nav.nav-list.well.projects
             %li.nav-header Проекты
@@ -124,6 +103,14 @@ wwqw
 
 
   %script(type="text/x-handlebars" data-template-name="issues_group")
+    
+    %h3 
+      =hb 'view.title'
+      %span.badge
+        =hb 'controller.length'
+      %span.tip 
+        =hb 'view.tip'
+
     =hb 'each i in controller  ' do
       =hb 'view App.IssueView issueBinding=i' do
         =hb 'if App.mode.isAll' do
@@ -137,3 +124,9 @@ wwqw
     
 
   = javascript_include_tag "all"
+  :coffeescript
+    #init
+    # ca18a75a2d1241a7aac4207fecb5d1372233f169
+    
+    App.set 'auth', Auth.create()
+    App.advanceReadiness()

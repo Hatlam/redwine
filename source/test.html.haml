@@ -1,0 +1,8 @@
+:coffeescript
+  window.addEventListener 'focus', ->
+    document.title = 'focused'
+  ,false
+
+  window.addEventListener 'blur', ->
+    document.title = 'not focused'
+  ,false

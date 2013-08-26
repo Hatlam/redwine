@@ -37,6 +37,9 @@ textarea
 img
   pointer-events: none
 
+a
+  -webkit-user-drag: none
+
 h3
   margin: 20px 0 0
   
@@ -64,9 +67,30 @@ h3
   // box-shadow: 0px 4px 20px #111
 
 .loader
-  margin: 8px 0 0 -15px
+  // margin: 8px 0 0 -15px
   position: absolute
-  left: 20px
+  background: #000 
+  // background: rgba(0,0,0,.9) url(../images/loader.gif) no-repeat center center
+  width: 140px
+  text-align: center
+  padding:  20px
+  font-size: 20px
+  color: #fff
+  border-bottom-left-radius: 20px
+  border-bottom-right-radius: 20px
+  z-index: 1100
+  
+  left: 50%
+  margin-left: -70px
+  top: -100px
+
+  transition: top .3s
+
+  &.show
+    top: 0
+
+   
+
 
 ul.nav.well
   padding-top: 6px 
@@ -83,8 +107,6 @@ ul.nav.well
   position: relative
   z-index: 1
 
-  &.priority-5
-    background: #F36F6F
 
 
   img
@@ -142,6 +164,9 @@ ul.nav.well
 
 .members 
   overflow: hidden
+  
+  .user
+    float: left
 
   .man
     width: 40px
@@ -149,7 +174,6 @@ ul.nav.well
     margin: 0 5px 5px 0
     border-radius: 40px
     overflow: hidden
-    float: left
     position: relative
       
     box-shadow: 0px 0px 8px #555
@@ -173,8 +197,45 @@ ul.nav.well
 .right-panel.fixed
   padding: 0 0 20px
   .projects
-    max-height: 300px
+    max-height: 200px
     overflow-y: scroll
+
+  .versions
+    overflow: hidden
+
+    .item
+      float: left
+      margin-right: 10px
+
+  .priority
+    .item
+      display: table-cell
+      width: 30px
+      height: 26px
+
+      border-top: 2px solid transparent 
+      border-bottom: 2px solid transparent 
+
+      &:hover
+        border-top: 2px solid #000
+        border-bottom: 2px solid #000
+
+
+
+
+
+.priority-7
+  background: #B31111
+
+.priority-6
+  background: #DF2727
+
+.priority-5
+  background: #F36F6F
+
+.priority-3
+  background: #6FB4F3 
+
 
 .inputArea
   > div
