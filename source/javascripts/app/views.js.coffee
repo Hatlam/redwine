@@ -31,9 +31,10 @@ App.ButtonGroup = Em.View.extend
       @set 'value', el.val()
 
 App.ProjectsView = Em.View.extend
-  dragOver: ->
-    b = $('body')[0]
-    b.scrollTop -= 5
+  dragOver: (event) ->
+    if $(event.target).closest('.navbar').length
+      $('body')[0].scrollTop -= 5
+      
 
 App.IssuesGroup = Ember.Mixin.create DragNDrop.Droppable,
   classNames: 'issue-group'.w()

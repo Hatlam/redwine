@@ -27,7 +27,7 @@ set :debug_assets, true
 configure :build do
   activate :relative_assets
   set :debug_assets, false
-  # ignore 'javascripts/*/*'
+  ignore 'javascripts/*/*'
   ignore 'stylesheets/normalize.*'
   ignore 'stylesheets/main.*'
   ignore 'stylesheets/*/*'

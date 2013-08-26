@@ -17,6 +17,12 @@ App.ApplicationRoute = Em.Route.extend
     unless App.auth.get 'apiKey'
       @transitionTo 'index'
 
+App.IndexRoute = Em.Route.extend
+  redirect: ->
+    if App.auth.get 'apiKey'
+      @transitionTo 'projects'
+
+
 
 App.ProjectsRoute = Em.Route.extend
   model: ->
