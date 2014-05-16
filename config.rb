@@ -39,4 +39,5 @@ activate :deploy do |deploy|
   deploy.user = "igor"
   deploy.host = "karies.cursor.ru"
   deploy.path = "/www/phpprojects/redwine"
+  deploy.build_before = true 
 end
