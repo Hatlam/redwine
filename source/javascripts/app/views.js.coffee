@@ -100,10 +100,11 @@ App.PriorityView = Em.View.extend DragNDrop.Dragable,
 
 
 App.TextArea = Ember.TextArea.extend
-  keyUp: (e) ->
+  keyDown: (e) ->
     if e.keyCode is 13 and (e.ctrlKey)
       v = @get('value').trim()
       if v.length
+        e.preventDefault()
         @get('controller').createIssue @parse v
         @set 'value',''
 
