@@ -2,7 +2,7 @@
 //= require vendor/jquery-ui
 //= require vendor/jquery.cookie
 //= require vendor/handlebars
-//= require vendor/ember-rc7
+//= require vendor/ember
 //= require vendor/ember-model
 //= require vendor/md5
 //= require lib/compile
