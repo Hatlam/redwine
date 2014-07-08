@@ -44,7 +44,7 @@ window.Auth = Em.Object.extend
   apiKey: null
 
   init: ->
-    @set 'ready', Em.RSVP.Promise (resolve) =>
+    @set 'ready', new Em.RSVP.Promise (resolve) =>
       @addObserver 'apiKey', =>
         key = @get 'apiKey'
         if key
