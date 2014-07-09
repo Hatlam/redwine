@@ -1,12 +1,15 @@
 redwine
 =======
-Ember.js based REST-client for Redmine - simple workflow
+
+Simple client for for Redmine with straightforward workflow
 [ screenshot ]
 
+It's a static single page app, made with Ember.js using Redmine REST-API.
+Building, minifiyng and dev server by [Middleman](http://middlemanapp.com/).
 
-Made as static html single page app. Managed with Middleman.
 
-
-Run
+Build
 -------
-root folder to serve via http is `./build`
+* `bundle install --binstubs`
+* `bin/middleman build`
+* Now you can serve `build/` via HTTP
